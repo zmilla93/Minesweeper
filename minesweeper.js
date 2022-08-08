@@ -1,31 +1,117 @@
+// Minesweeper by Zach Miller
+
 // Get a reference to the canvas
 var canvas = document.getElementById("myCanvas");
+canvas.onmousedown = handleMouseDown;
+canvas.onmouseup = handleMouseUp;
+canvas.onmousemove = handleMouseMove;
 // Get a reference to a 2D context of the canvas.
 // This is what holds the drawing functions.
 var ctx = canvas.getContext('2d');
 
 // Contants
 const iconSize = 16;
-const imageCount = 4;
 const boardOffsetX = 10;
 const boardOffsetY = 10;
+const boarderSize = 10;
 
 // Images
 var imagesLoaded = 0;
-let facesImage = new Image();
-let numberImage = new Image();
-let numberDebugImage = new Image();
-let tileImage = new Image();
+const imageCount = 4;
+var facesImage = new Image();
+var numberImage = new Image();
+var numberDebugImage = new Image();
+var tileImage = new Image();
+var debugBombs = true;
+var debugNumbers = true;
+
+// Settings
+var tileCountX = 30;
+var tileCountY = 20;
+var bombCount = 10;
 
 // Game
 var canvasRect;
-var field;
-var mineField;
+var boardRect;
+// var field;
+var tiles;
+// var mineField;
 var randomIndices;
 
-let tileCountX = 10;
-let tileCountY = 10;
-let bombCount = 10;
+// Interactions
+var pressed = false;
+var pressedIndex = -1;
+var clickPos;
+
+// Bind UI
+window.onload = function () {
+    var startButton = document.getElementById("startButton");
+    startButton.onclick = function () { startGame(30, 20, 1); }
+};
+
+
+function handleMouseDown(e) {
+    let x = e.x - canvasRect.x;
+    let y = e.y - canvasRect.y;
+
+
+    // if (x >= boardRect.x && y >= boardRect.y && x < boardRect.x + boardRect.width && y < boardRect.y + boardRect.height) {
+    if (isWithinBoard(x, y)) {
+        var pos = posToCoords(x, y);
+        clickPos = posToCoords(x, y);
+        drawTile(pos.x, pos.y, true);
+        console.log(x);
+        console.log(y);
+        pressed = true;
+    }
+}
+
+function handleMouseUp(e) {
+    let x = e.x - canvasRect.x;
+    let y = e.y - canvasRect.y;
+    if (pressed && isWithinBoard(x, y)) {
+        // REVEAL TILE
+        var pos = posToCoords(x, y);
+        revealTile(pos.x, pos.y);
+        drawBoard();
+    }
+    pressed = false;
+}
+
+function handleMouseMove(e) {
+    let x = e.x - canvasRect.x;
+    let y = e.y - canvasRect.y;
+    if (pressed) {
+        var pos = posToCoords(x, y);
+        if (pos.x != clickPos.x || pos.y != clickPos.y) {
+            drawTile(clickPos.x, clickPos.y, false);
+            if (isWithinBoard(x, y)) {
+                drawTile(pos.x, pos.y, true);
+                clickPos = pos;
+            }
+            console.log("goodn");
+        } else {
+
+        }
+    }
+}
+
+function isWithinBoard(x, y) {
+    return x >= boardRect.x && y >= boardRect.y && x < boardRect.x + boardRect.width && y < boardRect.y + boardRect.height;
+}
+
+function posToCoords(x, y) {
+    x -= boardOffsetX;
+    y -= boardOffsetY;
+    x = Math.floor(x / iconSize);
+    y = Math.floor(y / iconSize);
+    return { x: x, y: y }
+}
+
+function canvasToIndex() {
+    let x = e.x - canvasRect.x;
+    let y = e.y - canvasRect.y;
+}
 
 faces = {
     smile: { x: 0 },
@@ -43,44 +129,57 @@ function imageLoadedCallback() {
     }
 }
 
-function loadImages() {
-    facesImage = new Image();
-    numberImage = new Image();
-    numberDebugImage = new Image();
-    tileImage = new Image();
-    facesImage.onload = imageLoadedCallback;
-    numberImage.onload = imageLoadedCallback;
-    numberDebugImage.onload = imageLoadedCallback;
-    tileImage.onload = imageLoadedCallback;
-    facesImage.src = 'sprites/faces.png';
-    numberImage.src = 'sprites/numbers.png';
-    numberDebugImage.src = 'sprites/numbers_debug.png';
-    tileImage.src = 'sprites/tiles.png';
+function loadSpriteSheet(image, path) {
+    image.onload = imageLoadedCallback;
+    image.src = path;
 }
 
-function drawTile(x, y) {
-
+function loadSpriteSheets() {
+    loadSpriteSheet(facesImage, "sprites/faces.png");
+    loadSpriteSheet(numberImage, "sprites/numbers.png");
+    loadSpriteSheet(numberDebugImage, "sprites/numbers_debug.png");
+    loadSpriteSheet(tileImage, "sprites/tiles.png");
 }
 
-function drawTile(sheet, index, x, y) {
+function drawTile(x, y, pressed) {
+    image = tileImage;
+    index = 0;
+    let tile = tiles[x][y];
+    if (tile.revealed) {
+        image = numberImage;
+        index = tile.number;
+    } else {
+        if (pressed) {
+            index = 1;
+        } else {
+            if (debugNumbers) {
+                index = tile.number;
+                image = numberDebugImage;
+            } else {
+                index = 0;
+            }
+        }
+    }
+    drawTileFromSheet(image, index, x, y);
+}
+
+function drawTileFromSheet(sheet, index, x, y) {
     ctx.drawImage(sheet,
         (iconSize + 1) * index, 0, iconSize, iconSize,      // Sprite Sheet Position
         boardOffsetX + x * iconSize, boardOffsetY + y * iconSize, iconSize, iconSize);    // Canvas Position
 }
 
-
-
 function drawBoard() {
     for (let x = 0; x < tileCountX; x++) {
         for (let y = 0; y < tileCountY; y++) {
-
-            if (mineField[x][y]) {
-                drawTile(tileImage, 8, x, y);
+            drawTile(x, y, false);
+            if (tiles[x][y].bomb) {
+                // drawTileFromSheet(tileImage, 8, x, y);
                 // ctx.drawImage(facesImage,
                 //     iconSize + 1, 0, iconSize, iconSize,
                 //     x * iconSize, y * iconSize, iconSize, iconSize);
             } else {
-                drawTile(numberDebugImage, field[x][y], x, y)
+                // drawTileFromSheet(numberDebugImage, tiles[x][y].number, x, y)
                 // drawTile(tileImage, 2, x, y)
                 // ctx.drawImage(tileImage,
                 //     0, 0, iconSize, iconSize,
@@ -90,12 +189,46 @@ function drawBoard() {
     }
 }
 
+function revealTile(x, y) {
+    var tile = tiles[x][y];
+    if (tile.revealed) return;
+    tile.revealed = true;
+    // var neighborOffsets = [{ x: -1, y: 0 }, { x: 1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 },
+    // { x: -1, y: -1 }, { x: 1, y: -1 }, { x: -1, y: 1 }, { x: 1, y: 1 }];
+    // if (x == 28 && y == 19) {
+    //     console.log("Starting target tile...");
+    // }
+    if (tile.number == 0) {
+        for (var offsetX = -1; offsetX <= 1; offsetX++) {
+            for (var offsetY = -1; offsetY <= 1; offsetY++) {
+                // if (x == 28 && y == 19) {
+                //     console.log("neighbor check...");
+                // }
+                if (offsetX == 0 && offsetY == 0) continue;
+                var neighborX = x + offsetX;
+                var neighborY = y + offsetY;
+                // if (x == 28 && y == 19) {
+                //     console.log("Neighbor: " + neighborX + ", " + neighborY);
+                // }
+                if (neighborX < 0 || neighborX >= tileCountX || neighborY < 0 || neighborY >= tileCountY) continue;
+                revealTile(neighborX, neighborY);
+            }
+        }
+        // for (let i = 0; i < neighborOffsets.length; i++) {
+        //     var neighborX = x + neighborOffsets[i].x;
+        //     var neighborY = y + neighborOffsets[i].y;
+        //     if (neighborX < 0 || neighborX >= tileCountX || neighborY < 0 || neighborY >= tileCountY) continue;
+        //     revealTile(neighborX, neighborY);
+        // }
+    }
+}
+
 function toIndex(x, y) {
     return x + y * tileCountX;
 }
 
 function indexToCoords(index) {
-    let h = Math.floor(index / tileCountY);
+    let h = Math.floor(index / tileCountX);
     let w = index - h * tileCountX;
     return [w, h];
 }
@@ -112,33 +245,26 @@ function shuffleArray(array) {
     return array;
 }
 
-canvas.onmousedown = function (e) {
-    console.log("canvas:::" + canvas)
-    console.log(e.x - canvasRect.x);
-    console.log(e.y - canvasRect.y);
-    let x = e.x - canvasRect.x - boardOffsetX;
-    let y = e.y - canvasRect.y - boardOffsetY;
-}
 
-
-function placeBombs(width, height){
+function placeBombs(width, height) {
+    // console.log("mineField:");
+    // console.log(mineField);
     for (let i = 0; i < bombCount; i++) {
-        rng = randomIndices[i]
-        console.log("rng" + rng);
-        let h = Math.floor(rng / height);
-        console.log("h" + h);
-        console.log("w" + (rng - h * width));
-        console.log(indexToCoords(rng));
-        index = indexToCoords(rng);
-        mineField[index[0]][index[1]] = true;
+        console.log("adding bomb #" + i);
+        let rng = randomIndices[i]
+        console.log(rng);
+        let index = indexToCoords(rng);
+        console.log(index);
+        // mineField[index[0]][index[1]] = true;
+        tiles[index[0]][index[1]].bomb = true;
     }
 }
 
-function generateNumbers(width, height){
+function generateNumbers(width, height) {
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-            if (mineField[x][y]) {
-                field[x][y] = -1;
+            if (tiles[x][y].bomb) {
+                tiles[x][y].number = -1;
                 continue;
             }
             bombs = 0;
@@ -149,46 +275,44 @@ function generateNumbers(width, height){
                     let indexX = x + offsetX;
                     let indexY = y + offsetY;
                     if (indexX < 0 || indexX >= tileCountX || indexY < 0 || indexY >= tileCountY) {
-                        console.log("SKIP");
                         continue;
                     }
-                    if (mineField[indexX][indexY] == true)
+                    if (tiles[indexX][indexY].bomb == true)
                         bombs++
                 }
             }
-            console.log("check:" + check);
-            field[x][y] = bombs;
+            tiles[x][y].number = bombs;
         }
     }
 }
 
-
-function startGame(width, height, bombCount) {
+function startGame(width, height, bombs) {
     canvasRect = canvas.getBoundingClientRect();
-    canvas.width = boardOffsetX + tileCountX * iconSize;
-    canvas.height = boardOffsetY + tileCountY * iconSize;
+    boardRect = { x: boardOffsetX, y: boardOffsetY, width: tileCountX * iconSize, height: tileCountY * iconSize }
+    canvas.width = boardOffsetX + boarderSize + tileCountX * iconSize;
+    canvas.height = boardOffsetY + boarderSize + tileCountY * iconSize;
     tileCountX = width;
     tileCountY = height;
-    field = [width];
-    mineField = [width];
+    bombCount = bombs;
+    tiles = [width];
     randomIndices = [width * height]
+
+    // Initialize Tiles & Random Indices
     for (let x = 0; x < width; x++) {
-        field[x] = [height];
-        mineField[x] = [height];
+        tiles[x] = [height]
         for (let y = 0; y < height; y++) {
-            mineField[x][y] = false;
+            tiles[x][y] = { number: 0, bomb: false, revealed: false };
             randomIndices[toIndex(x, y)] = toIndex(x, y);
         }
     }
     shuffleArray(randomIndices);
 
-    // Place Bombs
+    // Generate Game Board
     placeBombs(width, height);
     generateNumbers(width, height);
-    console.log(mineField)
-    console.log(field)
+
     drawBoard();
 }
 
-loadImages();
-// startGame(10, 10, 10);
+// The game will initialize after all sprite sheets have been loaded
+loadSpriteSheets();
