@@ -81,19 +81,32 @@ window.onload = function () {
 function handleMouseDown(e) {
     let x = e.x - canvasRect.x;
     let y = e.y - canvasRect.y;
-    // if (x >= boardRect.x && y >= boardRect.y && x < boardRect.x + boardRect.width && y < boardRect.y + boardRect.height) {
     if (isWithinRect(faceRect, x, y)) {
         drawFace(1);
         facePressed = true;
     }
     if (!ended && isWithinBoard(x, y)) {
-        var pos = posToCoords(x, y);
-        clickPos = posToCoords(x, y);
-        drawTile(pos.x, pos.y, true);
-        console.log(x);
-        console.log(y);
-        pressed = true;
-        drawFace(2);
+        if (e.button == 0) {
+            let pos = posToCoords(x, y);
+            clickPos = posToCoords(x, y);
+            let tile = tiles[clickPos.x][clickPos.y]
+            if (tile.flagged != 1) {
+                drawTile(pos.x, pos.y, true);
+                pressed = true;
+                drawFace(2);
+            }
+        } else if (e.button == 2) {
+            let pos = posToCoords(x, y);
+            let tile = tiles[pos.x][pos.y];
+            if (!tile.revealed) {
+                tile.flagged++;
+                if (tile.flagged == 1) displayBombCount--;
+                else if (tile.flagged == 2) displayBombCount++;
+                else if (tile.flagged > 2) tile.flagged = 0;
+                drawBoard();
+                drawBombCounter();
+            }
+        }
     }
 }
 
@@ -107,8 +120,11 @@ function handleMouseUp(e) {
     }
     if (!ended && pressed && isWithinBoard(x, y)) {
         var pos = posToCoords(x, y);
-        revealTile(pos.x, pos.y);
-        checkWin();
+        var tile = tiles[pos.x][pos.y];
+        if (tile.flagged != 1) {
+            revealTile(pos.x, pos.y);
+            checkWin();
+        }
     }
     drawBoard();
     pressed = false;
@@ -122,10 +138,17 @@ function handleMouseMove(e) {
         var pos = posToCoords(x, y);
         if (clickPos == null || pos.x != clickPos.x || pos.y != clickPos.y) {
             if (clickPos != null)
+                // Depress old tile
                 drawTile(clickPos.x, clickPos.y, false);
             if (isWithinBoard(x, y)) {
-                drawTile(pos.x, pos.y, true);
-                clickPos = pos;
+                // Press new tile
+                var tile = tiles[pos.x][pos.y];
+                if (tile.flagged != 1) {
+                    drawTile(pos.x, pos.y, true);
+                    clickPos = pos;
+                } else {
+                    clickPos = null;
+                }
             } else {
                 clickPos = null;
             }
@@ -197,31 +220,37 @@ function drawTile(x, y, pressed) {
     let tile = tiles[x][y];
     if (tile.revealed) {
         if (tile.bomb) {
-            image = tileSprites;
-            index = 5;
+            if (state == GameState.Won) index = 2;
+            else if (state == GameState.Lost) index = 5;
             if (endBomb != null && endBomb.x == x && endBomb.y == y) index = 6;
-
-            // FIXME : Add red bomb
         } else {
             image = numberSprites;
             index = tile.number;
         }
     } else {
         if (pressed) {
-            index = 1;
+            if (tile.flagged == 2) index = 4
+            else index = 1;
         } else {
-            if (debugNumbers) {
-                if (tile.bomb) {
-                    image = tileSprites;
-                    index = 8;
-
-                } else {
-                    image = debugNumberSprites;
-                    index = tile.number;
-                }
+            if (tile.flagged == 1) {
+                index = 2;
+            } else if (tile.flagged == 2) {
+                index = 3;
             } else {
-                index = 0;
+                if (debugNumbers) {
+                    if (tile.bomb) {
+                        index = 8;
+
+                    } else {
+                        image = debugNumberSprites;
+                        index = tile.number;
+                    }
+                } else {
+                    index = 0;
+                }
             }
+
+
         }
     }
     let boardX = boardRect.x + x * tileSize;
@@ -303,10 +332,13 @@ function drawTimer(time) {
     drawSprite(digitSprites, 3, timerX + digitSprites.width * 2, digitY);
 }
 
-function drawBombCounter(time) {
-    drawSprite(digitSprites, 0, mineCounterX, digitY);
-    drawSprite(digitSprites, 2, mineCounterX + digitSprites.width, digitY);
-    drawSprite(digitSprites, 3, mineCounterX + digitSprites.width * 2, digitY);
+function drawBombCounter() {
+    let negative = displayBombCount < 0;
+    let text = Math.abs(clamp(displayBombCount, -99, 999)).toString().padStart(3);
+    let index1 = negative ? 10 : text.charAt(text.length - 3);
+    drawSprite(digitSprites, index1, mineCounterX, digitY);
+    drawSprite(digitSprites, text.charAt(text.length - 2), mineCounterX + digitSprites.width, digitY);
+    drawSprite(digitSprites, text.charAt(text.length - 1), mineCounterX + digitSprites.width * 2, digitY);
 }
 
 function revealTile(x, y) {
@@ -321,6 +353,7 @@ function revealTile(x, y) {
                 var neighborX = x + offsetX;
                 var neighborY = y + offsetY;
                 if (neighborX < 0 || neighborX >= tileCountX || neighborY < 0 || neighborY >= tileCountY) continue;
+                if (tiles[neighborX][neighborY].flagged > 0) continue;
                 revealTile(neighborX, neighborY);
             }
         }
@@ -355,15 +388,9 @@ function shuffleArray(array) {
 
 
 function placeBombs(width, height) {
-    // console.log("mineField:");
-    // console.log(mineField);
     for (let i = 0; i < bombCount; i++) {
-        console.log("adding bomb #" + i);
         let rng = randomIndices[i]
-        console.log(rng);
         let index = indexToCoords(rng);
-        console.log(index);
-        // mineField[index[0]][index[1]] = true;
         tiles[index[0]][index[1]].bomb = true;
     }
 }
@@ -425,7 +452,7 @@ function startGame(width, height, bombs) {
     for (let x = 0; x < width; x++) {
         tiles[x] = [height]
         for (let y = 0; y < height; y++) {
-            tiles[x][y] = { number: 0, bomb: false, revealed: false, flagged: false };
+            tiles[x][y] = { number: 0, bomb: false, revealed: false, flagged: 0 };
             randomIndices[toIndex(x, y)] = toIndex(x, y);
         }
     }
