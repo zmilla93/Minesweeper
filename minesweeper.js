@@ -20,8 +20,8 @@ let mineCounterX;
 let timerX;
 
 // Images
-var imagesLoaded = 0;
 const imageCount = 8;
+var imagesLoaded = 0;
 var borderHorizontalImage = new Image();
 var borderVerticalImage = new Image();
 var faceSprites;
@@ -36,7 +36,7 @@ var tileCountX = 30;
 var tileCountY = 20;
 var bombCount = 10;
 var debugBombs = true;
-var debugNumbers = true;
+var debugNumbers = false;
 
 // Game
 var canvasRect;
@@ -49,6 +49,9 @@ var endBomb;
 var displayBombCount;
 var targetRevealCount;
 var tilesRevealed;
+var timer;
+var elapsedTime = 0;
+var extraBombs;
 
 const GameState = Object.freeze({
     Loading: 0,
@@ -65,18 +68,29 @@ var pressedIndex = -1;
 var facePressed = false;
 var clickPos;
 
+// UI Elements
+var cheatCheckbox;
+
 // Bind UI
 window.onload = function () {
     var startButton = document.getElementById("startButton");
     var beginnerButton = document.getElementById("beginnerButton");
     var intermediateButton = document.getElementById("intermediateButton");
     var advancedButton = document.getElementById("advancedButton");
+    cheatCheckbox = document.getElementById("cheatModeCheckbox");
+    cheatCheckbox.onchange = handleCheatCheckbox;
     startButton.onclick = function () { startGame(30, 20, 1); }
     beginnerButton.onclick = function () { startGame(9, 9, 10); }
     intermediateButton.onclick = function () { startGame(16, 16, 30); }
     advancedButton.onclick = function () { startGame(30, 16, 99); }
+
 };
 
+function handleCheatCheckbox() {
+    console.log("cheat" + cheatCheckbox.checked);
+    debugNumbers = cheatCheckbox.checked;
+    drawBoard();
+}
 
 function handleMouseDown(e) {
     let x = e.x - canvasRect.x;
@@ -122,6 +136,22 @@ function handleMouseUp(e) {
         var pos = posToCoords(x, y);
         var tile = tiles[pos.x][pos.y];
         if (tile.flagged != 1) {
+            if (state != GameState.Running) {
+                state = GameState.Running;
+                timer = setInterval(incrementTimer, 1000);
+                if (tile.bomb) {
+                    tile.bomb = false;
+                    // var newTile = tile[extraBombs[0][0]][extraBombs[0][1]];
+                    if (extraBombs[0].x == pos.x && extraBombs[0].y == pos.y) {
+                        newTile = tiles[extraBombs[1][0]][extraBombs[1][1]].bomb = true;
+                    } else {
+                        tiles[extraBombs[0][0]][extraBombs[0][1]].bomb = true;
+                    }
+                    generateNumbers();
+
+                    // let 
+                }
+            }
             revealTile(pos.x, pos.y);
             checkWin();
         }
@@ -129,6 +159,12 @@ function handleMouseUp(e) {
     drawBoard();
     pressed = false;
     facePressed = false;
+}
+
+function incrementTimer() {
+    elapsedTime++;
+    drawTimer();
+    if (elapsedTime >= 999) clearInterval(timer);
 }
 
 function handleMouseMove(e) {
@@ -191,25 +227,16 @@ function loadSpriteSheet(path, width, height, offset) {
     var spriteSheet = { image: new Image(), width: width, height: height, offset: offset };
     spriteSheet.image.onload = imageLoadedCallback;
     spriteSheet.image.src = path;
-    // console.log(spriteSheet.image);
     return spriteSheet;
 }
 
 function loadSpriteSheets() {
-    // loadImage(facesImage, "sprites/faces.png");
-    // loadImage(numberImage, "sprites/numbers.png");
-    // loadImage(numberDebugImage, "sprites/numbers_debug.png");
-    // loadImage(tileImage, "sprites/tiles.png");
     loadImage(borderHorizontalImage, "sprites/border_horizontal.png");
     loadImage(borderVerticalImage, "sprites/border_vertical.png");
-    // loadImage(cornersImage, "sprites/corners.png");
-
     faceSprites = loadSpriteSheet("sprites/faces.png", 24, 24, 1);
     numberSprites = loadSpriteSheet("sprites/numbers.png", 16, 16, 1);
     debugNumberSprites = loadSpriteSheet("sprites/numbers_debug.png", 16, 16, 1);
     tileSprites = loadSpriteSheet("sprites/tiles.png", 16, 16, 1);
-    // borderHorizontalSprite = loadSpriteSheet("sprites/border_horizontal.png", 16, 10, 0);
-    // borderVerticalSprite = loadSpriteSheet("sprites/border_vertical.png", 10, 16, 0);
     cornerSprites = loadSpriteSheet("sprites/corners.png", 10, 10, 0);
     digitSprites = loadSpriteSheet("sprites/digits.png", 13, 23, 1);
 }
@@ -221,7 +248,7 @@ function drawTile(x, y, pressed) {
     if (tile.revealed) {
         if (tile.bomb) {
             if (state == GameState.Won) index = 2;
-            else if (state == GameState.Lost) index = 5;
+            else if (state == GameState.Lost) index = 5
             if (endBomb != null && endBomb.x == x && endBomb.y == y) index = 6;
         } else {
             image = numberSprites;
@@ -233,14 +260,14 @@ function drawTile(x, y, pressed) {
             else index = 1;
         } else {
             if (tile.flagged == 1) {
-                index = 2;
+                if (state == GameState.Lost) index = 7;
+                else index = 2;
             } else if (tile.flagged == 2) {
                 index = 3;
             } else {
                 if (debugNumbers) {
                     if (tile.bomb) {
                         index = 8;
-
                     } else {
                         image = debugNumberSprites;
                         index = tile.number;
@@ -249,8 +276,6 @@ function drawTile(x, y, pressed) {
                     index = 0;
                 }
             }
-
-
         }
     }
     let boardX = boardRect.x + x * tileSize;
@@ -273,7 +298,6 @@ function drawSprite(sheet, index, x, y) {
 function drawBorders() {
     ctx.fillStyle = '#C0C0C0';
     ctx.fillRect(borderSize, borderSize, boardRect.width, tileSize * 2)
-
     // Corners
     drawSprite(cornerSprites, 0, 0, 0);
     drawSprite(cornerSprites, 1, borderSize + boardRect.width, 0);
@@ -281,7 +305,6 @@ function drawBorders() {
     drawSprite(cornerSprites, 3, borderSize + boardRect.width, borderSize + tileSize * 2);
     drawSprite(cornerSprites, 4, 0, boardRect.y + boardRect.height, borderSize);
     drawSprite(cornerSprites, 5, borderSize + boardRect.width, boardRect.y + boardRect.height, borderSize);
-
     // Horizontal Bars
     for (var i = 0; i < tileCountX; i++) {
         ctx.drawImage(borderHorizontalImage, borderSize + tileSize * i, 0);
@@ -326,10 +349,11 @@ function drawFace(index) {
     drawSprite(faceSprites, index, faceRect.x, faceRect.y);
 }
 
-function drawTimer(time) {
-    drawSprite(digitSprites, 0, timerX, digitY);
-    drawSprite(digitSprites, 2, timerX + digitSprites.width, digitY);
-    drawSprite(digitSprites, 3, timerX + digitSprites.width * 2, digitY);
+function drawTimer() {
+    let text = Math.abs(clamp(elapsedTime, -0, 999)).toString().padStart(3);
+    drawSprite(digitSprites, text.charAt(text.length - 3), timerX, digitY);
+    drawSprite(digitSprites, text.charAt(text.length - 2), timerX + digitSprites.width, digitY);
+    drawSprite(digitSprites, text.charAt(text.length - 1), timerX + digitSprites.width * 2, digitY);
 }
 
 function drawBombCounter() {
@@ -387,17 +411,22 @@ function shuffleArray(array) {
 }
 
 
-function placeBombs(width, height) {
+function placeBombs() {
     for (let i = 0; i < bombCount; i++) {
         let rng = randomIndices[i]
         let index = indexToCoords(rng);
         tiles[index[0]][index[1]].bomb = true;
     }
+    extraBombs = [indexToCoords(randomIndices[bombCount]), indexToCoords(randomIndices[bombCount + 1])];
+    // TEMP
+    let tempTile = tiles[extraBombs[0][0]][extraBombs[0][1]]
+    if (tempTile.bomb) console.log("NAILED");
+    console.log(extraBombs[0][0] + ", " + extraBombs[0][1]);
 }
 
-function generateNumbers(width, height) {
-    for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height; y++) {
+function generateNumbers() {
+    for (let x = 0; x < tileCountX; x++) {
+        for (let y = 0; y < tileCountY; y++) {
             if (tiles[x][y].bomb) {
                 tiles[x][y].number = -1;
                 continue;
@@ -423,10 +452,12 @@ function generateNumbers(width, height) {
 
 function startGame(width, height, bombs) {
     state = GameState.Launched;
+    elapsedTime = 0;
     ended = false;
     endBomb = null;
     tileCountX = width;
     tileCountY = height;
+    if (timer != null) clearInterval(timer);
     boardRect = { x: boardOffsetX, y: boardOffsetY, width: tileCountX * tileSize, height: tileCountY * tileSize }
     canvas.width = boardOffsetX + borderSize + tileCountX * tileSize;
     canvas.height = boardOffsetY + borderSize + tileCountY * tileSize;
@@ -459,8 +490,8 @@ function startGame(width, height, bombs) {
     shuffleArray(randomIndices);
 
     // Generate Game Board
-    placeBombs(width, height);
-    generateNumbers(width, height);
+    placeBombs();
+    generateNumbers();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBorders();
@@ -484,6 +515,8 @@ function endGame(win) {
     if (win) state = GameState.Won;
     else state = GameState.Lost;
     ended = true;
+    clearInterval(timer);
+    // Reveal Bombs
     for (x = 0; x < tileCountX; x++) {
         for (y = 0; y < tileCountY; y++) {
             let tile = tiles[x][y];
@@ -494,8 +527,6 @@ function endGame(win) {
         }
     }
     drawBoard();
-    // if (win) drawFace(3);
-    // else drawFace(4);
 }
 
 // The game will initialize after all sprite sheets have been loaded

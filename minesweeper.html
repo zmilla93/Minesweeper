@@ -2,10 +2,11 @@
 
 <head>
     <title>Minesweeper!</title>
+    <link rel="stylesheet" href="minesweeper.css">
 </head>
 
 <body>
-    <canvas id="minesweeperCanvas" style="border:1px solid #c0c0c0;">
+    <canvas id="minesweeperCanvas" class="unselectable" style="border:1px solid #c0c0c0;">
         Canvas is not supported!
     </canvas>
     <br>
@@ -15,4 +16,6 @@
     <input type="button" id="intermediateButton" value="Intermediate">
     <input type="button" id="advancedButton" value="Advanced">
     <input type="number" id="bombCount" min="10" max="999999">
+    <input type="checkbox" id="cheatModeCheckbox" class="unselectable"><label for=cheatModeCheckbox
+        class="unselectable">Cheat Mode</label>
 </body>
