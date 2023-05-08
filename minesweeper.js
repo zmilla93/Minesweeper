@@ -69,7 +69,7 @@ const Difficulty = Object.freeze({
 });
 
 let state = GameState.Loading;
-
+let currentDifficulty = Difficulty.Beginner;
 
 
 // Interactions
@@ -89,10 +89,10 @@ window.onload = function () {
     let advancedButton = document.getElementById("advancedButton");
     cheatCheckbox = document.getElementById("cheatModeCheckbox");
     cheatCheckbox.onchange = handleCheatCheckbox;
-    startButton.onclick = function () { startGame(30, 20, 1); }
-    beginnerButton.onclick = function () { startGame(9, 9, 10); }
-    intermediateButton.onclick = function () { startGame(16, 16, 30); }
-    advancedButton.onclick = function () { startGame(30, 16, 99); }
+    startButton.onclick = function () { startGame(currentDifficulty); }
+    beginnerButton.onclick = function () { startGame(Difficulty.Beginner); }
+    intermediateButton.onclick = function () { startGame(Difficulty.Intermediate); }
+    advancedButton.onclick = function () { startGame(Difficulty.Expert); }
 
 };
 
@@ -139,7 +139,7 @@ function handleMouseUp(e) {
     if (!ended)
         drawFace(0);
     if (isWithinRect(faceRect, x, y) && facePressed) {
-        startGame(10, 10, 3);
+        startGame(currentDifficulty);
     }
     if (!ended && pressed && isWithinBoard(x, y)) {
         let pos = posToCoords(x, y);
@@ -223,7 +223,7 @@ function posToCoords(x, y) {
 function imageLoadedCallback() {
     imagesLoaded++;
     if (imagesLoaded == imageCount) {
-        startGame(tileCountX, tileCountY, bombCount);
+        startGame(currentDifficulty);
     }
 }
 
@@ -455,7 +455,14 @@ function generateNumbers() {
     }
 }
 
-function startGame(width, height, bombs) {
+function startGame(difficulty) {
+
+    currentDifficulty = difficulty;
+    let width = difficulty.width;
+    let height = difficulty.height;
+    let bombs = difficulty.mineCount;
+
+
     state = GameState.Launched;
     elapsedTime = 0;
     ended = false;
