@@ -1,15 +1,7 @@
 // Minesweeper by Zach Miller
 
-// Get a reference to the canvas
-let canvas = document.getElementById("minesweeperCanvas");
-canvas.onmousedown = handleMouseDown;
-canvas.onmouseup = handleMouseUp;
-canvas.onmousemove = handleMouseMove;
-canvas.oncontextmenu = function (e) { e.preventDefault(); };
-
-// Get a reference to a 2D context of the canvas.
-// This is what holds the drawing functions.
-let ctx = canvas.getContext('2d');
+let canvas;
+let ctx;
 
 // Contants
 const tileSize = 16;
@@ -82,7 +74,22 @@ let clickPos;
 let cheatCheckbox;
 
 // Bind UI
-window.onload = function () {
+
+function init() {
+    bindUI();
+
+    canvas = document.getElementById("minesweeperCanvas");
+    canvas.onmousedown = handleMouseDown;
+    canvas.onmouseup = handleMouseUp;
+    canvas.onmousemove = handleMouseMove;
+    canvas.oncontextmenu = function (e) { e.preventDefault(); };
+    ctx = canvas.getContext('2d');
+
+    // Game will auto start when all sprites have been loaded
+    loadSpriteSheets();
+}
+
+function bindUI() {
     let startButton = document.getElementById("startButton");
     let beginnerButton = document.getElementById("beginnerButton");
     let intermediateButton = document.getElementById("intermediateButton");
@@ -93,8 +100,7 @@ window.onload = function () {
     beginnerButton.onclick = function () { startGame(Difficulty.Beginner); }
     intermediateButton.onclick = function () { startGame(Difficulty.Intermediate); }
     advancedButton.onclick = function () { startGame(Difficulty.Expert); }
-
-};
+}
 
 function handleCheatCheckbox() {
     debugNumbers = cheatCheckbox.checked;
@@ -148,13 +154,13 @@ function handleMouseUp(e) {
             if (state != GameState.Running) {
                 state = GameState.Running;
                 timer = setInterval(incrementTimer, 1000);
-                if (tile.bomb) {
-                    tile.bomb = false;
+                if (tile.mine) {
+                    tile.mine = false;
                     // let newTile = tile[extraBombs[0][0]][extraBombs[0][1]];
                     if (extraBombs[0].x == pos.x && extraBombs[0].y == pos.y) {
-                        newTile = tiles[extraBombs[1][0]][extraBombs[1][1]].bomb = true;
+                        newTile = tiles[extraBombs[1][0]][extraBombs[1][1]].mine = true;
                     } else {
-                        tiles[extraBombs[0][0]][extraBombs[0][1]].bomb = true;
+                        tiles[extraBombs[0][0]][extraBombs[0][1]].mine = true;
                     }
                     generateNumbers();
 
@@ -255,7 +261,7 @@ function drawTile(x, y, pressed) {
     index = 0;
     let tile = tiles[x][y];
     if (tile.revealed) {
-        if (tile.bomb) {
+        if (tile.mine) {
             if (state == GameState.Won) index = 2;
             else if (state == GameState.Lost) index = 5
             if (endBomb != null && endBomb.x == x && endBomb.y == y) index = 6;
@@ -275,7 +281,7 @@ function drawTile(x, y, pressed) {
                 index = 3;
             } else {
                 if (debugNumbers) {
-                    if (tile.bomb) {
+                    if (tile.mine) {
                         index = 8;
                     } else {
                         image = debugNumberSprites;
@@ -378,7 +384,7 @@ function revealTile(x, y) {
     let tile = tiles[x][y];
     if (tile.revealed) return;
     tile.revealed = true;
-    if (!tile.bomb) tilesRevealed++;
+    if (!tile.mine) tilesRevealed++;
     if (tile.number == 0) {
         for (let offsetX = -1; offsetX <= 1; offsetX++) {
             for (let offsetY = -1; offsetY <= 1; offsetY++) {
@@ -390,7 +396,7 @@ function revealTile(x, y) {
                 revealTile(neighborX, neighborY);
             }
         }
-    } else if (tile.bomb) {
+    } else if (tile.mine) {
         ended = true;
         endBomb = { x: x, y: y };
         endGame(false);
@@ -424,7 +430,7 @@ function placeBombs() {
     for (let i = 0; i < bombCount; i++) {
         let rng = randomIndices[i]
         let index = indexToCoords(rng);
-        tiles[index[0]][index[1]].bomb = true;
+        tiles[index[0]][index[1]].mine = true;
     }
     extraBombs = [indexToCoords(randomIndices[bombCount]), indexToCoords(randomIndices[bombCount + 1])];
 }
@@ -432,7 +438,7 @@ function placeBombs() {
 function generateNumbers() {
     for (let x = 0; x < tileCountX; x++) {
         for (let y = 0; y < tileCountY; y++) {
-            if (tiles[x][y].bomb) {
+            if (tiles[x][y].mine) {
                 tiles[x][y].number = -1;
                 continue;
             }
@@ -446,7 +452,7 @@ function generateNumbers() {
                     if (indexX < 0 || indexX >= tileCountX || indexY < 0 || indexY >= tileCountY) {
                         continue;
                     }
-                    if (tiles[indexX][indexY].bomb == true)
+                    if (tiles[indexX][indexY].mine == true)
                         bombs++
                 }
             }
@@ -495,7 +501,7 @@ function startGame(difficulty) {
     for (let x = 0; x < width; x++) {
         tiles[x] = [height]
         for (let y = 0; y < height; y++) {
-            tiles[x][y] = { number: 0, bomb: false, revealed: false, flagged: 0 };
+            tiles[x][y] = { number: 0, mine: false, revealed: false, flagged: 0 };
             randomIndices[toIndex(x, y)] = toIndex(x, y);
         }
     }
@@ -532,7 +538,7 @@ function endGame(win) {
     for (x = 0; x < tileCountX; x++) {
         for (y = 0; y < tileCountY; y++) {
             let tile = tiles[x][y];
-            if (tile.bomb) {
+            if (tile.mine) {
                 tile.revealed = true;
                 if (win) tile.flagged = true;
             }
@@ -541,5 +547,4 @@ function endGame(win) {
     drawBoard();
 }
 
-// The game will initialize after all sprite sheets have been loaded
-loadSpriteSheets();
+window.addEventListener("load", init)
