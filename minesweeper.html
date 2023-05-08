@@ -1,21 +1,91 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <title>Minesweeper!</title>
-    <link rel="stylesheet" href="minesweeper.css">
+    <meta charset="utf-8">
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="css/minesweeper.css">
+    <script src="scripts/minesweeper.js"></script>
+    <link rel="icon" type="image/x-icon" href="images/logo.png">
 </head>
 
 <body>
-    <canvas id="minesweeperCanvas" class="unselectable" style="border:1px solid #c0c0c0;">
-        Canvas is not supported!
-    </canvas>
-    <br>
-    <script src="minesweeper.js"></script>
-    <input type="button" id="startButton" value="Restart">
-    <input type="button" id="beginnerButton" value="Beginner">
-    <input type="button" id="intermediateButton" value="Intermediate">
-    <input type="button" id="advancedButton" value="Advanced">
-    <input type="number" id="bombCount" min="10" max="999999">
-    <input type="checkbox" id="cheatModeCheckbox" class="unselectable"><label for=cheatModeCheckbox
-        class="unselectable">Cheat Mode</label>
+
+    <div id="content">
+
+        <div id="wrapper">
+            <h1>Minesweeper</h1>
+
+
+            <input type="button" value="Settings">
+            <input type="button" value="Cheat Mode">
+            <br>
+
+            <canvas id="minesweeperCanvas" class="unselectable" style="border:1px solid #c0c0c0;">
+            </canvas>
+            <br>
+
+
+
+            <div id="overlay" class="fullScreenFlexContainer">
+
+                <div id="rules" class="centerFlexItem overlayItem">
+                    <div class="closeHeader">
+                        <img src="images/close.png" class="closeButton">
+                    </div>
+
+                    <div class="overlayContents">
+                        <h4>How to Play</h4>
+                        <!-- <br> -->
+                        The goal is to reveal every tile that doesn't contain a mine. Click a mine, and it's game
+                        over!<br>
+                        When tiles are revealed, they will show the number of mines adjacent to that tile. <br>
+                        When a tile has no adjacent mines, all adjacent tiles are revealed. <br>
+
+                        <h4>Controls</h4>
+                        Left click to reveal a tile.<br>
+                        Right click to mark a tile with a flag, preventing it from being clicked. Do this on tiles you
+                        belive contain mines.<br>
+                        Right clicking a flagged tile will mark it with a question mark. Do this on tiles you are unsure
+                        of.<br>
+                    </div>
+                </div>
+
+                <div id="settings" class="centerFlexItem overlayItem">
+                    <div class="closeHeader">
+                        <img src="images/close.png" class="closeButton">
+                    </div>
+
+                    <div class="overlayContents">
+                    <input type="radio" id="beginner" name="difficulty" value="beginner">
+                    <label for="beginner">Beginner | 9x9, 10 mines</label><br>
+
+                    <input type="radio" id="intermediate" name="difficulty" value="intermediate">
+                    <label for="intermediate">Intermediate | 16x16, 40 mines</label><br>
+
+                    <input type="radio" id="expert" name="difficulty" value="expert">
+                    <label for="expert">Expert | 30x16, 99 mines</label><br>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+            <!-- <input type="button" id="startButton" value="Restart">
+            <input type="button" id="beginnerButton" value="Beginner">
+            <input type="button" id="intermediateButton" value="Intermediate">
+            <input type="button" id="advancedButton" value="Advanced">
+            <input type="number" id="bombCount" min="10" max="999999"> -->
+            <!-- <input type="checkbox" id="cheatModeCheckbox" class="unselectable"><label for=cheatModeCheckbox
+                class="unselectable">Cheat Mode</label> -->
+
+            <a href="">Source Code</a>
+
+        </div>
+    </div>
+
 </body>
+
+</html>

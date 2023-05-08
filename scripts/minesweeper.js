@@ -76,7 +76,7 @@ let cheatCheckbox;
 // Bind UI
 
 function init() {
-    bindUI();
+    // bindUI();
 
     canvas = document.getElementById("minesweeperCanvas");
     canvas.onmousedown = handleMouseDown;
