@@ -148,15 +148,12 @@ function handleMouseUp(e) {
                 timer = setInterval(incrementTimer, 1000);
                 if (tile.mine) {
                     tile.mine = false;
-                    // let newTile = tile[extraBombs[0][0]][extraBombs[0][1]];
                     if (extraBombs[0].x == pos.x && extraBombs[0].y == pos.y) {
                         newTile = tiles[extraBombs[1][0]][extraBombs[1][1]].mine = true;
                     } else {
                         tiles[extraBombs[0][0]][extraBombs[0][1]].mine = true;
                     }
                     generateNumbers();
-
-                    // let 
                 }
             }
             revealTile(pos.x, pos.y);
@@ -289,12 +286,6 @@ function drawTile(x, y, pressed) {
     let boardX = boardRect.x + x * tileSize;
     let boardY = boardRect.y + y * tileSize;
     drawSprite(image, index, boardX, boardY)
-}
-
-function drawTileFromSheet(sheet, index, x, y) {
-    ctx.drawImage(sheet,
-        (tileSize + 1) * index, 0, tileSize, tileSize,      // Sprite Sheet Position
-        boardOffsetX + x * tileSize, boardOffsetY + y * tileSize, tileSize, tileSize);    // Canvas Position
 }
 
 function drawSprite(sheet, index, x, y) {
