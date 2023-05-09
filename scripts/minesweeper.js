@@ -28,8 +28,8 @@ let digitSprites;
 let tileCountX = 30;
 let tileCountY = 20;
 let bombCount = 10;
-let debugBombs = true;
-let debugNumbers = false;
+// let debugBombs = true;
+let cheatMode = false;
 
 // Game
 let canvasRect;
@@ -102,8 +102,8 @@ function bindUI() {
     advancedButton.onclick = function () { startGame(Difficulty.Expert); }
 }
 
-function handleCheatCheckbox() {
-    debugNumbers = cheatCheckbox.checked;
+function toggleCheatMode(){
+    cheatMode = !cheatMode;
     drawBoard();
 }
 
@@ -280,7 +280,7 @@ function drawTile(x, y, pressed) {
             } else if (tile.flagged == 2) {
                 index = 3;
             } else {
-                if (debugNumbers) {
+                if (cheatMode) {
                     if (tile.mine) {
                         index = 8;
                     } else {

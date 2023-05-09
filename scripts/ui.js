@@ -1,8 +1,7 @@
-function run() {
-    let closeButtons = document.getElementsByClassName("closeButton");
-    let overlayItems = document.getElementsByClassName("overlayItem");
-    let overlay = document.getElementById("overlay");
+let overlay;
+let overlayItems;
 
+function run() {
     let howToPlayButton = document.getElementById("howToPlayButton");
     let howToPlayDialog = document.getElementById("howToPlay");
     howToPlayButton.onclick=function(){
@@ -10,18 +9,16 @@ function run() {
         howToPlayDialog.style.display = "block";
     };
 
-    // let w = document.getElementById("t")
-    // w.onclick = function(){alert("!");};
+    let cheatModeButton = document.getElementById("cheatModeButton");
+    cheatModeButton.onclick = toggleCheatMode;
+
+    let closeButtons = document.getElementsByClassName("closeButton");
+    overlayItems = document.getElementsByClassName("overlayItem");
+    overlay = document.getElementById("overlay");
 
     for(let closeButton of closeButtons){
-        closeButton.onclick = function(){
-            overlay.style.display = "none";
-            for(let overlayItem of overlayItems){
-                overlayItem.style.display = "none";
-            }
-        }
+        closeButton.onclick = closeOverlays;
     }
-
 
     // let startButton = document.getElementById("startButton");
     let beginnerButton = document.getElementById("beginnerButton");
@@ -34,6 +31,13 @@ function run() {
     intermediateButton.onclick = function () { startGame(Difficulty.Intermediate); }
     expertButton.onclick = function () { startGame(Difficulty.Expert); }
 
+}
+
+function closeOverlays(){
+    overlay.style.display = "none";
+    for(let overlayItem of overlayItems){
+        overlayItem.style.display = "none";
+    }
 }
 
 window.addEventListener("load", run);
