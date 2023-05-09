@@ -28,7 +28,6 @@ let digitSprites;
 let tileCountX = 30;
 let tileCountY = 20;
 let bombCount = 10;
-// let debugBombs = true;
 let cheatMode = false;
 
 // Game
@@ -61,8 +60,7 @@ const Difficulty = Object.freeze({
 });
 
 let state = GameState.Loading;
-let currentDifficulty = Difficulty.Beginner;
-
+let currentDifficulty = Difficulty.Intermediate;
 
 // Interactions
 let pressed = false;
@@ -70,14 +68,7 @@ let pressedIndex = -1;
 let facePressed = false;
 let clickPos;
 
-// UI Elements
-let cheatCheckbox;
-
-// Bind UI
-
 function init() {
-    // bindUI();
-
     canvas = document.getElementById("minesweeperCanvas");
     canvas.onmousedown = handleMouseDown;
     canvas.onmouseup = handleMouseUp;
