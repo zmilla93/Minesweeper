@@ -31,7 +31,6 @@ let bombCount = 10;
 let cheatMode = false;
 
 // Game
-let canvasRect;
 let boardRect;
 let faceRect;
 let tiles;
@@ -99,8 +98,9 @@ function toggleCheatMode(){
 }
 
 function handleMouseDown(e) {
-    let x = e.x - canvasRect.x;
-    let y = e.y - canvasRect.y;
+    let canvasRect = canvas.getBoundingClientRect();
+    let x = e.clientX - canvasRect.x;
+    let y = e.clientY - canvasRect.y;
     if (isWithinRect(faceRect, x, y)) {
         drawFace(1);
         facePressed = true;
@@ -131,8 +131,9 @@ function handleMouseDown(e) {
 }
 
 function handleMouseUp(e) {
-    let x = e.x - canvasRect.x;
-    let y = e.y - canvasRect.y;
+    let canvasRect = canvas.getBoundingClientRect();
+    let x = e.clientX - canvasRect.x;
+    let y = e.clientY - canvasRect.y;
     if (!ended)
         drawFace(0);
     if (isWithinRect(faceRect, x, y) && facePressed) {
@@ -174,8 +175,9 @@ function incrementTimer() {
 }
 
 function handleMouseMove(e) {
-    let x = e.x - canvasRect.x;
-    let y = e.y - canvasRect.y;
+    let canvasRect = canvas.getBoundingClientRect();
+    let x = e.clientX - canvasRect.x;
+    let y = e.clientY - canvasRect.y;
     if (pressed) {
         let pos = posToCoords(x, y);
         if (clickPos == null || pos.x != clickPos.x || pos.y != clickPos.y) {
@@ -470,7 +472,6 @@ function startGame(difficulty) {
     boardRect = { x: boardOffsetX, y: boardOffsetY, width: tileCountX * tileSize, height: tileCountY * tileSize }
     canvas.width = boardOffsetX + borderSize + tileCountX * tileSize;
     canvas.height = boardOffsetY + borderSize + tileCountY * tileSize;
-    canvasRect = canvas.getBoundingClientRect();
     faceRect = {
         x: boardRect.x + boardRect.width / 2 - faceSprites.width / 2, y: borderSize + tileSize - faceSprites.height / 2,
         width: faceSprites.width, height: faceSprites.height
