@@ -4,50 +4,83 @@
 <head>
     <meta charset="utf-8">
     <title>Minesweeper</title>
-    <link rel="stylesheet" href="css/minesweeper.css">
-    <script src="scripts/minesweeper.js"></script>
     <link rel="icon" type="image/x-icon" href="images/logo.png">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/minesweeper.css">
+
+    <!-- Scripts -->
+    <script src="scripts/minesweeper.js"></script>
+    <script src="scripts/ui.js"></script>
 </head>
 
 <body>
 
+    <div id="navbar">
+        <div id="navbarWrapper">
+            <span>asd</span>
+            <span>bsd</span>
+        </div>
+    </div>
+
     <div id="content">
 
+        <div id="fakeNavbar">
+            <div id="navbarWrapper">
+                <!-- <ul>
+                    <li>How to Play</li>
+                    <li>Source Code</li>
+                </ul> -->
+                <span>asd</span>
+                <span>bsd</span>
+            </div>
+        </div>
+
         <div id="wrapper">
-            <h1>Minesweeper</h1>
+            <!-- <h1>Minesweeper</h1> -->
+            <span id="beginnerButton" class="button">Beginner</span>
+            <span id="intermediateButton" class="button">Intermediate</span>
+            <span id="expertButton" class="button">Expert</span>
+            <!-- <span id="expertButton" class="button">Toggle Cheat Mode</span> -->
 
-
-            <input type="button" value="Settings">
-            <input type="button" value="Cheat Mode">
             <br>
 
-            <canvas id="minesweeperCanvas" class="unselectable" style="border:1px solid #c0c0c0;">
-            </canvas>
+            <div id="canvasWrapper" class="flexContainer">
+                <canvas id="minesweeperCanvas" class="unselectable" style="border:1px solid #c0c0c0;">
+                </canvas><br>
+            </div>
+
+            <div class="flexContainer sideFlex">
+                <span id="howToPlayButton" class="button">How to Play</span>
+                <span id="cheatModeButton" class="button">Cheat Mode</span>
+            </div>
             <br>
 
-
+            <div class="flexContainer">
+                <a href="#" target="_blank" class="button">Source Code</a>
+            </div>
 
             <div id="overlay" class="fullScreenFlexContainer">
 
-                <div id="rules" class="centerFlexItem overlayItem">
+                <div id="howToPlay" class="centerFlexItem overlayItem">
                     <div class="closeHeader">
                         <img src="images/close.png" class="closeButton">
                     </div>
 
                     <div class="overlayContents">
                         <h4>How to Play</h4>
-                        <!-- <br> -->
                         The goal is to reveal every tile that doesn't contain a mine. Click a mine, and it's game
                         over!<br>
                         When tiles are revealed, they will show the number of mines adjacent to that tile. <br>
-                        When a tile has no adjacent mines, all adjacent tiles are revealed. <br>
+                        When a revealed tile has no adjacent mines, all adjacent tiles are revealed. <br><br>
 
                         <h4>Controls</h4>
                         Left click to reveal a tile.<br>
                         Right click to mark a tile with a flag, preventing it from being clicked. Do this on tiles you
                         belive contain mines.<br>
-                        Right clicking a flagged tile will mark it with a question mark. Do this on tiles you are unsure
+                        Right click a flagged tile to mark it with a question mark. Do this on tiles you are unsure
                         of.<br>
+                        Click the smiley to restart the game.<br>
                     </div>
                 </div>
 
@@ -57,14 +90,14 @@
                     </div>
 
                     <div class="overlayContents">
-                    <input type="radio" id="beginner" name="difficulty" value="beginner">
-                    <label for="beginner">Beginner | 9x9, 10 mines</label><br>
+                        <input type="radio" id="beginner" name="difficulty" value="beginner">
+                        <label for="beginner">Beginner | 9x9, 10 mines</label><br>
 
-                    <input type="radio" id="intermediate" name="difficulty" value="intermediate">
-                    <label for="intermediate">Intermediate | 16x16, 40 mines</label><br>
+                        <input type="radio" id="intermediate" name="difficulty" value="intermediate">
+                        <label for="intermediate">Intermediate | 16x16, 40 mines</label><br>
 
-                    <input type="radio" id="expert" name="difficulty" value="expert">
-                    <label for="expert">Expert | 30x16, 99 mines</label><br>
+                        <input type="radio" id="expert" name="difficulty" value="expert">
+                        <label for="expert">Expert | 30x16, 99 mines</label><br>
 
                     </div>
                 </div>
@@ -81,7 +114,6 @@
             <!-- <input type="checkbox" id="cheatModeCheckbox" class="unselectable"><label for=cheatModeCheckbox
                 class="unselectable">Cheat Mode</label> -->
 
-            <a href="">Source Code</a>
 
         </div>
     </div>

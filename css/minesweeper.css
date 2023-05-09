@@ -1,86 +1,141 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Hind&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+:root {
+    --main-color: #25c1cc;
+    --text-color: black;
+    /* --cool-color: green; */
+}
+
 html,
 body {
     margin: 0;
     width: 100%;
     height: 100%;
+    color: black;
+    background-color: bisque;
+}
+
+#navbar {
+    position: absolute;
+    float: right;
+    background-color: red;
+    width: 100%;
+}
+
+#navbarWrapper {
+    float:right;
 }
 
 #content {
-    background-color: red;
+    /* background-color: red; */
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
-    /* flex-grow: 0; */
+    /* font-family: 'Hind', sans-serif; */
+    font-family: 'Roboto', sans-serif;
+    /* min-height: fit-content; */
 }
 
-.fullScreenFlexContainer{
+.fullScreenFlexContainer {
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
 }
 
-.centerFlexItem{
+.flexContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.sideFlex {
+    justify-content: space-between;
+}
+
+.centerFlexItem {
     align-self: center;
 }
 
 #wrapper {
-    background-color: blue;
+    /* background-color: blue; */
     /* flex-grow: 0; */
     height: fit-content;
     align-self: center;
+    overflow: auto;
+}
+
+#canvasWrapper {
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 #settings {
     cursor: default;
 }
 
-#settings{
+#settings {
     display: none;
 }
 
-#rules{
-    /* display: none; */
+#rules {
+    display: none;
 }
 
-.closeHeader{
+.closeHeader {
     width: 100%;
     /* background-color: red; */
 }
 
-.closeButton{
+.closeButton {
     width: 24px;
     height: 24px;
-    float:right;
+    float: right;
     cursor: pointer;
 }
 
-#overlay{
+#overlay {
     position: fixed;
-    left:0;
-    top:0;
+    left: 0;
+    top: 0;
+    display: none;
     /* width: 100%;
     height:100%; */
-    background-color: rgba(0, 0, 0, 0.452);
+    background-color: rgba(0, 0, 0, 0.75);
     z-index: 1;
 }
 
-.overlayContents{
-    margin:20px;
+.overlayContents {
+    margin: 20px;
 }
 
-.overlayItem{
+.overlayItem {
     border: 1px solid black;
     border-radius: 5px;
-    /* padding:20px; */
+    background-color: rgb(125, 125, 204);
+    overflow: auto;
+    max-height: 100vh;
 }
 
-.overlayItem h4{
+.overlayItem h4 {
     /* margin:0; */
-    margin-top:10px;
-    margin-bottom:10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     text-decoration: underline;
+}
+
+.button {
+    padding: 2px;
+    border: 1px solid black;
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
 }
 
 .unselectable {
